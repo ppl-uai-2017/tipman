@@ -26,6 +26,7 @@ $db_handle = new DBController();
 								<?php 
 											
 									$id = $_GET['id'];
+									$_SESSION['idchildcare']=$id;
 									$childcare = $db_handle->runQuery("SELECT * FROM childcare WHERE id ='$id'" );
 									if (!empty($childcare)) { 
 										foreach($childcare as $key=>$value){
@@ -71,6 +72,9 @@ $db_handle = new DBController();
 											<li class="description_tab" id="tab-title-description" role="tab" aria-controls="tab-description">
 												<a href="#tab-description">What's Included</a>
 											</li>
+											<li class="package_tab" id="tab-title-description" role="tab" aria-controls="tab-description">
+												<a href="#tab-package">Our Package</a>
+											</li>
 											<li class="additional_information_tab" id="tab-title-additional_information" role="tab" aria-controls="tab-additional_information">
 												<a href="#tab-additional_information">Additional information</a>
 											</li>
@@ -103,6 +107,26 @@ $db_handle = new DBController();
 													<th></th>
 													<td><p>Nappies Included</p></td>
 												</tr>
+											</table>
+										</div>
+										<div class="woocommerce-Tabs-panel woocommerce-Tabs-panel--description panel entry-content wc-tab" id="tab-package" role="tabpanel" aria-labelledby="tab-title-description">
+					
+											<h2>Our Package</h2>
+
+											<table class="shop_attributes">
+												<tr>
+													<th></th>
+													<td><p>BABY CLASS</p></td>
+												</tr>
+												<tr>
+													<th></th>
+													<td><p>Daily Fee</p></td>
+												</tr>
+												<tr>
+													<th></th>
+													<td><p>IDR 500.000</p></td>
+												</tr>
+												
 											</table>
 										</div>
 										<div class="woocommerce-Tabs-panel woocommerce-Tabs-panel--additional_information panel entry-content wc-tab" id="tab-additional_information" role="tabpanel" aria-labelledby="tab-title-additional_information">
@@ -181,6 +205,8 @@ $db_handle = new DBController();
 													<div class="post_header entry-header">
 														<h2 class="woocommerce-loop-product__title"><a href="#"><?php echo $childcarerelated[$key]["businessname"]?></a></h2>			
 													</div><!-- /.post_header -->
+													<div class="sc_services_item_content"><p><?php echo $childcarerelated[$key]["companyaddress"]."<br>".$childcarerelated[$key]["companyregion"]."  ".$childcarerelated[$key]["companypostcode"] ;?></p>
+													</div>
 													<span class="price"><span class="woocommerce-Price-amount amount"><span class="woocommerce-Price-currencySymbol"></span></span></span>
 													<a rel="nofollow" href="detail.php?id=<?php echo $childcarerelated[$key]["id"]?>" data-quantity="1" data-product_id="826" data-product_sku="" class="button product_type_variable add_to_cart_button">See details</a>				
 												</div><!-- /.post_data_inner -->
@@ -208,7 +234,7 @@ $db_handle = new DBController();
 </body>
 
 <div class="w3-container">
-	<h2>Book A Seat</h2>
+	
 		<div id="login" class="w3-modal">
 			<div class="w3-modal-content w3-card-2 w3-animate-zoom" style="max-width:1500px">
 				<div class="w3-center"><br>
@@ -244,31 +270,30 @@ $db_handle = new DBController();
 										<div class="column-1_2">
 										<h6>Date*</h6>
 										<p><span class="wpcf7-form-control-wrap ">
-										<input type="text" name="pickupdate" id='datem' value="" size="40" class="wpcf7-form-control wpcf7-date wpcf7-validates-as-required" aria-required="true" placeholder="Date" /> </span>
+										<input type="text" name="pickupdate" id='datem' value="" size="40" class="wpcf7-form-control wpcf7-date wpcf7-validates-as-required" aria-required="true" placeholder="2017-11-24" /> </span>
 										</p></div>
 									</div>
 									<div class="columns_wrap">
 										<div class="column-1_2">
 										<h6>Start Time</h6>
 										<p><span class="wpcf7-form-control-wrap">
-										<input type="text" name="timestart" id='starttimem' value="" size="40" class="wpcf7-form-control wpcf7-date wpcf7-time" placeholder="Start Time" /> </span>
+										<input type="text" name="timestart" id='starttimem' value="" size="40" class="wpcf7-form-control wpcf7-date wpcf7-time" placeholder="07.00" /> </span>
 										</p></div>
 										<div class="column-1_2">
 										<h6>Finish Time</h6>
 										<p><span class="wpcf7-form-control-wrap">
-										<input type="text" name="timefinish" id='finishtimem' value="" size="40" class="wpcf7-form-control wpcf7-date wpcf7-time" placeholder="Finish Time" /> </span>
+										<input type="text" name="timefinish" id='finishtimem' value="" size="40" class="wpcf7-form-control wpcf7-date wpcf7-time" placeholder="17.00" /> </span>
 										</p></div>
 									</div>
 									<h6>Children in Care</h6>
 										<div class="columns_wrap">
 										<div class="column-1_1">
 										<span class="wpcf7-form-control-wrap textarea-children-care">
-										<textarea name="textarea-children-care" id='childincarem' cols="40" rows="10" class="wpcf7-form-control wpcf7-textarea" aria-invalid="false" placeholder="Children in Care"></textarea></span>
+										<textarea name="textarea-children-care" id='childincarem' cols="40" rows="10" class="wpcf7-form-control wpcf7-textarea" aria-invalid="false" placeholder="Description about your child treatment"></textarea></span>
 										</div>
 										</div>
 									<div class="center">
 									<button type="button"  class="button alt w3-button w3-pink w3-section w3-padding" id='a'>Reserve the seat!</button>
-														
 										<!--<button class="w3-button w3-block " type="button"  name='submit' id='a'>-->
 									</div>
 									<div class="wpcf7-response-output wpcf7-display-none"></div>
@@ -310,6 +335,14 @@ function(){
 		swal('Please fill on the field');
 	}
 	else{
+		$namem = document.getElementById('namem').value;
+		$phonem = document.getElementById('phonem').value;
+		$emailm = document.getElementById('emailm').value;
+		$datem = document.getElementById('datem').value;
+		$starttimem = document.getElementById('starttimem').value;
+		$finishtimem = document.getElementById('finishtimem').value;
+		$childincarem = document.getElementById('childincarem').value;
+		
 		swal({
 		title:"Are you want to reserve the seat?",
 		text:"",
@@ -322,7 +355,7 @@ function(){
 					swal("Your Invoice is Generated!", {
 					icon: "success",
 					}).then(function() {
-						window.location = "invoice.php";
+					window.location.href = "insertbooking.php?namem="+$namem+"&phonem="+$phonem+"&emailm="+$emailm+"&datem="+$datem+"&starttimem="+$starttimem+"&finishtimem="+$finishtimem+"&childincarem="+$childincarem;
 					});
 				} else {
 					swal("Have a search!");
@@ -334,5 +367,4 @@ function(){
 });
 
 </script>
-
 
