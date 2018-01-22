@@ -1,0 +1,322 @@
+<?php 
+session_start();
+require "head.php";
+$username = $_SESSION['username'];
+$session = mysqli_query($con, "SELECT * FROM childcare WHERE username = '$username'");
+$detail = mysqli_fetch_assoc($session);
+$_SESSION['id'] = $detail['id'];
+$id = $_SESSION['id'];
+?>
+
+<body>
+<!--Header-->
+  <div class="header" id="home">
+    <!--Top-Bar-->
+    <?php require "topbar.php"; ?>
+
+<div class="w3-container">
+  <div class="w3-row">
+  <div  class="w3-container city">
+    <h3 style='color:midnightblue'>Gallery - Manage your gallery </h3><br/>
+    <div style="overflow-x:auto;">
+    <button  type="button" class="buttonupload btn btn-info btn-lg" data-toggle="modal" data-target="#modalupload" id="buttonupload" data-id="<?php echo $id; ?>" ><i class="fa fa-upload">&nbsp Add new photo</i></button>
+    
+    <button  type="button" class="buttonuploadvideo btn btn-info btn-lg" data-toggle="modal" data-target="#modaluploadvideo" id="buttonuploadvideo" data-id="<?php echo $id; ?>" ><i class="fa fa-upload">&nbsp Add new video</i></button>
+
+
+
+    <h4 style='color:black'>Your Gallery : </h4>
+    <div class="w3portfolioaits" id="gallery">
+    <div class="w3portfolioaits-items">
+      
+      <?php 
+      $sql = mysqli_query($con, "SELECT * FROM gallery WHERE id_childcare = '$id'"); 
+      while($gallery = mysqli_fetch_assoc($sql)){
+      ?>
+      <div class="col-md-3 w3portfolioaits-item w3portfolioaits-item-1">
+        <a class="example-image-link" href="../images/gallery/<?php echo $gallery['filefoto']?>" data-lightbox="example-set" data-title="">
+          <div class="grid">
+            <figure class="effect-apollo">
+              <?php if (strpos($gallery['filefoto'], 'mp4') == false) { ?>
+              <img src="../images/gallery/<?php echo $gallery['filefoto']?>" alt="Game Robo">
+              <?php } else { ?>
+              <video width="320" height="240" controls>
+                <source src="../images/gallery/<?php echo $gallery['filefoto']?>" type="video/mp4">
+              </video>
+              <?php } ?>
+                <figcaption></figcaption>
+            </figure></a>
+            <center>
+            <button type="button" title='delete' class="buttondelete btn btn-info btn-lg" data-toggle="modal" data-target="#modaldelete" id="buttondelete" data-id='<?php echo $gallery['id']?>' data-file="<?php echo $gallery['filefoto']; ?>"><i class="fa fa-trash"> </i></button>
+          </center>
+          </div>
+      </div>
+      <?php } ?>
+
+      <div class="clearfix"></div>
+    </div>
+
+  </div>
+</div>
+</div>
+</div>
+</div>
+</body>
+
+   <div class="modal fade" id="modalupload" role="dialog">
+    <div class="modal-dialog">
+      <!-- Modal content-->
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal">×</button>
+          <h4 class="modal-title">Upload your photo into gallery</h4>
+        </div>
+
+        <div class="modal-body">
+          <form action="" class="w3-container w3-card-4 w3-light-grey w3-text-blue w3-margin" method="post" enctype="multipart/form-data">
+            <div class="w3-row w3-section">
+        <div class="w3-col" style="max-width:50px"><i class=" "></i></div>
+          <div class="w3-rest">
+            <label style='color:grey'>id childcare :</label>
+              <input type="text" name="id_childcare" id="id_childcare" style='color:grey' readonly>
+          </div>
+      </div>
+            <div class="w3-row w3-section">
+        <div class="w3-col" style="max-width:50px"><i class=" "></i></div>
+          <div class="w3-rest">
+            <label>Select image to upload:</label>
+              <input type="file" name="filefoto" id="filefoto">
+          </div>
+      </div>
+        
+      <button class="w3-button w3-block w3-section w3-blue w3-ripple w3-padding" name='upload' onclick='confirm("Are you sure you want to add this photo into gallery? ")'>upload</button>
+      <br/>
+    </form>
+          
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+        </div>
+      </div>
+      
+    </div>
+   </div>
+
+<?php
+
+// Check if image file is a actual image or fake image
+if(isset($_POST["upload"])) {
+  $id_childcare = $_POST['id_childcare'];
+  $target_dir = "../images/gallery/";
+  $target_file = $target_dir . $_POST['id_childcare']."_".basename($_FILES["filefoto"]["name"]);
+  $uploadOk = 1;
+  $imageFileType = strtolower(pathinfo($target_file,PATHINFO_EXTENSION));
+    $check = getimagesize($_FILES["filefoto"]["tmp_name"]);
+  // Check if file already exists
+  if (file_exists($target_file)) {
+      echo "<script>swal('Sorry, file already exists.')</script>";
+      $uploadOk = 0;
+  }
+  // Check file size
+  if ($_FILES["filefoto"]["size"] > 500000) {
+      echo "<script>swal('Sorry, your file is too large.')</script>";
+      $uploadOk = 0;
+  }
+  // Allow certain file formats
+  if($imageFileType != "jpg" && $imageFileType != "png" && $imageFileType != "jpeg"
+  && $imageFileType != "gif" ) {
+      echo "<script>swal('Sorry, only JPG, JPEG, PNG & GIF files are allowed.')</script>";
+      $uploadOk = 0;
+  }
+  // Check if $uploadOk is set to 0 by an error
+  if ($uploadOk == 0) {
+      echo "<script>swal('Sorry, your file was not uploaded.";
+  // if everything is ok, try to upload file
+  } else {
+      if (move_uploaded_file($_FILES["filefoto"]["tmp_name"], $target_file)) {
+
+          $filefoto = $_POST['id_childcare']."_".$_FILES["filefoto"]["name"];
+          mysqli_query($con, "INSERT INTO gallery(id_childcare, filefoto) VALUES('$id_childcare', '$filefoto')") ;
+          echo "<script>swal({
+                title: 'We have applied your changes!',
+                text: 'Your payment receipt has been uploaded',
+                type: 'success'
+              }).then(function() {
+                window.location = '';
+              });
+            </script>";
+      } else {
+          echo "<script>swal('Sorry, there was an error uploading your file.')</script>";
+      }
+  }
+}
+?>
+
+   <div class="modal fade" id="modaluploadvideo" role="dialog">
+    <div class="modal-dialog">
+      <!-- Modal content-->
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal">×</button>
+          <h4 class="modal-title">Upload your video into gallery</h4>
+        </div>
+
+        <div class="modal-body">
+          <form action="" class="w3-container w3-card-4 w3-light-grey w3-text-blue w3-margin" method="post" enctype="multipart/form-data">
+            <div class="w3-row w3-section">
+        <div class="w3-col" style="max-width:50px"><i class=" "></i></div>
+          <div class="w3-rest">
+            <label style='color:grey'>id childcare :</label>
+              <input type="text" name="id_childcare" id="id_childcare" style='color:grey' readonly>
+          </div>
+      </div>
+            <div class="w3-row w3-section">
+        <div class="w3-col" style="max-width:50px"><i class=" "></i></div>
+          <div class="w3-rest">
+            <label>Select video to upload:</label>
+              <input type="file" name="file_video" id="file_video">
+          </div>
+      </div>
+        
+      <button class="w3-button w3-block w3-section w3-blue w3-ripple w3-padding" name='uploadvideo' onclick='confirm("Are you sure you want to add this video into gallery? ")'>upload</button>
+      <br/>
+    </form>
+          
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+        </div>
+      </div>
+      
+    </div>
+   </div>
+
+
+
+ <script>
+$(document).ready(function(){
+   $(".buttonupload.btn.btn-info.btn-lg").click(function(){
+      $("#modalupload").modal({backdrop: "static"});
+      var id_childcare=$(this).data('id');
+      $(".modal-body #id_childcare").val(id_childcare); 
+    });
+   $(".buttonuploadvideo.btn.btn-info.btn-lg").click(function(){
+      $("#modaluploadvideo").modal({backdrop: "static"});
+      var id_childcare=$(this).data('id');
+      $(".modal-body #id_childcare").val(id_childcare); 
+    });
+   $(".buttondelete.btn.btn-info.btn-lg").click(function(){
+      $("#modaldelete").modal({backdrop: "static"});
+      var id_gallery=$(this).data('id');
+      var file=$(this).data('file');
+      $(".modal-body #id_gallery").val(id_gallery); 
+      $(".modal-body #file").val(file); 
+    });
+   
+});
+</script>
+
+
+
+  <!-- Modal -->
+  <div class="modal fade" id="modaldelete" role="dialog">
+    <div class="modal-dialog">
+    
+      <!-- Modal content-->
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal">×</button>
+          <h4 class="modal-title">Delete your photo? </h4>
+        </div>
+
+        <div class="modal-body">
+          <form action="" class="w3-container w3-card-4 w3-light-grey w3-text-blue w3-margin" method="post">
+            
+      <div class="w3-row w3-section">
+        <div class="w3-col" style="max-width:50px"><i class=""></i></div>
+          <div class="w3-rest">
+            <label style='color:grey'>id photo</label>
+            <input class="w3-input w3-border" name="id_gallery" id='id_gallery' type="text" readonly style='color:grey'>
+            <input class="w3-input w3-border" name="file" id='file' type="hidden" readonly style='color:grey'>
+          </div>
+      </div>
+      <button class="w3-button w3-block w3-section w3-blue w3-ripple w3-padding" name='delete' onclick='confirm("Are you sure want to delete this photo from your gallery?")'>Delete Photo</button>
+      <br/>
+    </form>
+          
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+        </div>
+      </div>
+      
+    </div>
+   </div>
+   <?php 
+   if (isset($_POST['delete'])){
+      $id_gallery = $_POST['id_gallery'];
+      $file = $_POST['file'];
+      mysqli_query($con, "DELETE FROM gallery WHERE id='$id_gallery'");
+      unlink("../images/gallery/$file");
+      echo '<script>
+      
+      swal({
+        title: "We have applied your changes!",
+        text: "Your photo was deleted",
+        type: "success"
+      }).then(function() {
+        window.location = "";
+      });
+      
+      </script>'; 
+      
+   }
+   ?>
+
+
+
+<?php
+if (isset($_POST['uploadvideo']))
+{
+    $name=$_FILES['file_video']['name'];
+    $type=$_FILES['file_video']['type'];
+    $size=$_FILES['file_video']['size'];
+    //replace tanda spasi pada nama file dengan _
+    $nama_file=str_replace(" ","_",$name);
+    $tmp_name=$_FILES['file_video']['tmp_name'];
+    $nama_folder="../images/gallery/";
+    $nama_file_baru=$nama_folder.$_POST['id_childcare']."_".basename($nama_file);
+    //Filter jenis file video dan ukuran file
+    if ((($type == "video/mp4") || ($type == "video/3gpp")  || ($type == "video/x-flv")) && ($size < 50000000 ))
+    {
+        //cek jika nama dile sudah ada
+        if (file_exists($nama_file_baru))
+        {
+            echo "<script>swal('Sorry, file already exists.')</script>";
+        }
+        else
+        {  
+            //pindah file dari temporari ke alamat tujuan
+            if(move_uploaded_file($tmp_name,$nama_file_baru))
+            {
+                $filefoto = $_POST['id_childcare']."_".$_FILES["file_video"]["name"];
+                $id_childcare = $_POST['id_childcare'];
+                mysqli_query($con, "INSERT INTO gallery(id_childcare, filefoto) VALUES('$id_childcare', '$filefoto')") ;
+                echo "<script>swal({
+                      title: 'We have applied your changes!',
+                      text: 'Your payment receipt has been uploaded',
+                      type: 'success'
+                    }).then(function() {
+                      window.location = '';
+                    });
+                  </script>";
+            }
+        }
+    }
+    else
+    {
+       echo "<script>swal('Sorry, file is too large. Maximum size = 50 MB.')</script>";
+    }
+    
+}
+?>
